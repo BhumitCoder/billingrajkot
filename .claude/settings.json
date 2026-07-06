@@ -15,7 +15,8 @@
       "Bash(awk -F: '$1 >= 3580 && $1 <= 3620 {print}')",
       "Bash(awk -F: '$1 >= 3650 && $1 <= 3680 {print}')",
       "Bash(npx tsc *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   }
 }
