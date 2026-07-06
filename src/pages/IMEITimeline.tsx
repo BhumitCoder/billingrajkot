@@ -548,6 +548,10 @@ export default function IMEITimeline() {
                   <span className="font-semibold text-foreground">Status:</span>{" "}
                   {selectedUnit.status.replace(/_/g, " ")}
                 </p>
+                <p>
+                  <span className="font-semibold text-foreground">Bill:</span>{" "}
+                  {selectedUnit.withBill === false ? "Without Bill" : "With Bill"}
+                </p>
               </div>
             ) : null}
           </CardHeader>
@@ -627,4 +631,11 @@ export default function IMEITimeline() {
                   </div>
                 ))}
               </div>
- 
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
