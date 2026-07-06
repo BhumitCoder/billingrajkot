@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc --noEmit)",
+      "Bash(node:*)",
+      "Bash(/tmp/cleanup_ewb.js:*)",
+      "Bash(/tmp/cleanup_gst.js:*)",
+      "Bash(/tmp/gst_cleanup.js:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(python3:*)",
+      "Bash(npx vite build)",
+      "Bash(git -C \"c:/Users/STAFF1/Downloads/inventory-and-bill-management\" log --oneline -10 -- src/components/SampleBillView.tsx)",
+      "Bash(git -C \"c:/Users/STAFF1/Downloads/inventory-and-bill-management\" diff 91ea12a -- src/components/SampleBillView.tsx)",
+      "Bash(git -C \"c:/Users/STAFF1/Downloads/inventory-and-bill-management\" show 91ea12a:src/components/SampleBillView.tsx)",
+      "Bash(git -C \"c:/Users/STAFF1/Downloads/inventory-and-bill-management\" stash list)",
+      "Bash(/tmp/fix_sampleview.py:*)",
+      "Bash(\"c:/Users/STAFF1/Downloads/inventory-and-bill-management/fix_view_py.py\":*)",
+      "Bash(git -C \"c:/Users/STAFF1/Downloads/inventory-and-bill-management\" log --oneline -5 -- src/components/BillView.tsx)",
+      "Bash(git -C \"c:/Users/STAFF1/Downloads/inventory-and-bill-management\" diff 91ea12a -- src/components/BillView.tsx)",
+      "Bash(git -C \"c:/Users/STAFF1/Downloads/inventory-and-bill-management\" show 91ea12a:src/components/BillView.tsx)",
+      "Bash(npm run build:*)",
+      "Bash(xargs grep -l \"BankAccount\\\\|bank-accounts\\\\|BankAccounts\")",
+      "Bash(xargs grep -l \"PaymentDialog\\\\|CollectPayment\")",
+      "Bash(grep -l \"BillPDF\\\\|SampleBillPDF\" /Users/arpanbajpai/inventory-and-bill-management/src/pages/*.tsx /Users/arpanbajpai/inventory-and-bill-management/src/components/*.tsx)",
+      "Bash(grep -l \"Bill\\\\|Invoice\\\\|Sample\" /Users/arpanbajpai/inventory-and-bill-management/src/pages/*.tsx)",
+      "Bash(grep -E \"\\\\.\\(tsx|ts\\)$\")",
+      "Bash(grep -rn \"grossProfit\\\\|netProfit\\\\|= totalSell\\\\|= totalPurchase\" /Users/arpanbajpai/inventory-and-bill-management/src/pages/*.tsx)",
+      "Bash(grep -n \"//.*gst\\\\|//.*tax\\\\|/\\\\*.*gst\\\\|/\\\\*.*tax\" /f/inventory-and-bill-management/src/components/BillView.tsx -i)",
+      "Bash(grep -n \"//.*gst\\\\|//.*tax\\\\|/\\\\*.*gst\\\\|/\\\\*.*tax\" /f/inventory-and-bill-management/src/components/BillForm.tsx -i)",
+      "Bash(xargs grep -l \"gst\\\\|GST\\\\|CGST\\\\|SGST\\\\|IGST\\\\|hsnCode\\\\|taxRate\" -i)",
+      "Bash(xargs grep -l \"interface Bill\\\\|type Bill\")",
+      "Bash(grep -n \"export.*roundToTwoDecimals\\\\|function roundToTwoDecimals\" f:/inventory-and-bill-management/src/lib/*.ts)"
+    ]
+  }
+}

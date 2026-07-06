@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout HEAD -- src/pages/Report.tsx)",
+      "Read(//c/Users/bhumi/AppData/Local/Temp/claude/**)",
+      "Bash(sort -k5 -rh)",
+      "Bash(npm cache clean --force)",
+      "Bash(npm install jsbarcode @types/jsbarcode)",
+      "Bash(firebase projects:list)",
+      "Bash(find ~ -name \"*.json\" -path \"*firebase*\" -maxdepth 5 2>/dev/null | grep -v node_modules | head -20)",
+      "Read(//Users/arpanbajpai/**)",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)",
+      "Bash(awk 'NR>=637 && NR<=1051' /Users/arpanbajpai/inventory-and-bill-management/src/lib/firebaseService.ts)",
+      "Bash(awk -F: '$1 >= 3580 && $1 <= 3620 {print}')",
+      "Bash(awk -F: '$1 >= 3650 && $1 <= 3680 {print}')",
+      "Bash(npx tsc *)",
+      "Bash(npm install *)"
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ibell - Professional GST Billing Software</title>
+    <meta
+      name="description"
+      content="Complete GST billing solution with inventory management, client tracking, and professional invoice generation"
+    />
+    <meta name="author" content="Ibell" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1a1a2e" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Ibell" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/public/favicon.ico" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@Ibell" />
+    <meta name="twitter:image" content="/public/favicon.ico" />
+    <meta
+      property="og:title"
+      content="Ibell - Professional GST Billing Software"
+    />
+    <meta
+      name="twitter:title"
+      content="Ibell - Professional GST Billing Software"
+    />
+    <meta
+      property="og:description"
+      content="Complete GST billing solution with inventory management, client tracking, and professional invoice generation"
+    />
+    <meta
+      name="twitter:description"
+      content="Complete GST billing solution with inventory management, client tracking, and professional invoice generation"
+    />
+    <link rel="icon" type="image/x-icon" href="/public/favicon.ico" />
+
+    <!-- Anti-DevTools Security -->
+    <script>
+      (function () {
+        'use strict';
+
+        // Allow full devtools access on localhost / 127.0.0.1
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
+
+        // ── 1. Block all DevTools keyboard shortcuts ────────────────────────
+        var _blockedKeys = ['I','i','J','j','C','c','K','k','E','e','S','s'];
+        document.addEventListener('keydown', function (e) {
+          // F12
+          if (e.key === 'F12') { e.preventDefault(); e.stopPropagation(); return false; }
+          // Ctrl/Cmd + Shift + [DevTools keys]
+          if ((e.ctrlKey || e.metaKey) && e.shiftKey && _blockedKeys.indexOf(e.key) !== -1) {
+            e.preventDefault(); e.stopPropagation(); return false;
+          }
+          // Ctrl+U (View Source), Ctrl+S (Save)
+          if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
+            e.preventDefault(); e.stopPropagation(); return false;
+          }
+          // F5 source panel shortcut blocked
+          if (e.key === 'F5' && e.ctrlKey) { e.preventDefault(); return false; }
+        }, true);
+
+        // ── 2. Block right-click at both mousedown and contextmenu level ────
+        document.addEventListener('contextmenu', function (e) {
+          e.preventDefault(); e.stopPropagation(); return false;
+        }, true);
+        document.addEventListener('mousedown', function (e) {
+          if (e.button === 2) { e.preventDefault(); e.stopPropagation(); return false; }
+        }, true);
+        document.addEventListener('pointerdown', function (e) {
+          if (e.button === 2) { e.preventDefault(); e.stopPropagation(); return false; }
+        }, true);
+
+        // ── 3. Always-running debugger loop ────────────────────────────────
+        setInterval(function () { debugger; }, 100);
+
+        // ── 4. Disable text selection (harder to copy/scrape) ───────────────
+        document.addEventListener('selectstart', function (e) {
+          // Allow selection in input/textarea elements only
+          var tag = e.target && e.target.tagName;
+          if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+            e.preventDefault(); return false;
+          }
+        }, true);
+
+        // ── 5. Block drag (prevents dragging elements to inspect) ───────────
+        document.addEventListener('dragstart', function (e) {
+          e.preventDefault(); return false;
+        }, true);
+
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
