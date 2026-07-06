@@ -504,9 +504,16 @@ export default function IMEITimeline() {
                     {""}
                   </p>
                   <div className="mt-2 flex items-center justify-between">
-                    <Badge variant="outline" className="text-[10px]">
-                      {u.status.replace(/_/g, " ").toUpperCase()}
-                    </Badge>
+                    <div className="flex items-center gap-1">
+                      <Badge variant="outline" className="text-[10px]">
+                        {u.status.replace(/_/g, " ").toUpperCase()}
+                      </Badge>
+                      {u.withBill === false && (
+                        <Badge variant="destructive" className="text-[10px]">
+                          NO BILL
+                        </Badge>
+                      )}
+                    </div>
                     <span className="text-[10px] text-muted-foreground">
                       {formatDate(u.updatedAt || u.createdAt)}
                     </span>
