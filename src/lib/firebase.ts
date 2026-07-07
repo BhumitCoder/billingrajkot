@@ -25,7 +25,7 @@ const app = initializeApp(firebaseConfig);
 // Firebase Auth
 export const auth = getAuth(app);
 
-// Initialize Firestore
+// Initialize Firestore — uses the named "invoicemitra-rajkot" database, not "(default)"
 export const db: Firestore = getFirestore(app);
 
 // Initialize Storage — uses storageBucket from firebaseConfig automatically

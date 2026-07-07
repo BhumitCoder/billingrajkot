@@ -284,7 +284,7 @@ export default function StockAudit() {
 
     (doc as any).autoTable({
       startY: 32,
-      head: [["#", "Model / Name", "IMEI / SN", "Storage", "Color", "Battery", "Warranty", "With Bill"]],
+      head: [["#", "Model / Name", "IMEI / SN", "Storage", "Color", "Battery", "Warranty"]],
       body: missing.map((u, i) => [
         i + 1,
         u.model || u.productName,
@@ -293,7 +293,6 @@ export default function StockAudit() {
         u.color || "—",
         u.batteryHealth || "—",
         u.warranty || "—",
-        u.withBill === false ? "No" : "Yes",
       ]),
       styles: { fontSize: 8 },
       headStyles: { fillColor: [239, 68, 68] },
@@ -554,14 +553,7 @@ export default function StockAudit() {
                                 className={`border-b last:border-0 ${i % 2 === 0 ? "" : "bg-muted/20"}`}
                               >
                                 <td className="px-3 py-2.5">
-                                  <div className="flex items-center gap-1.5">
-                                    <p className="text-xs font-medium">{u.model || u.productName}</p>
-                                    {u.withBill === false && (
-                                      <span className="text-[9px] font-semibold text-red-600 border border-red-300 rounded px-1 py-0.5">
-                                        NO BILL
-                                      </span>
-                                    )}
-                                  </div>
+                                  <p className="text-xs font-medium">{u.model || u.productName}</p>
                                   {(u.batteryHealth || u.warranty) && (
                                     <p className="text-[10px] text-muted-foreground">
                                       {u.batteryHealth && `Batt: ${u.batteryHealth}`}
@@ -660,14 +652,7 @@ export default function StockAudit() {
                             <tr key={u.id} className={i % 2 === 0 ? "" : "bg-muted/20"}>
                               <td className="px-3 py-2.5 text-xs text-muted-foreground">{i + 1}</td>
                               <td className="px-3 py-2.5">
-                                <div className="flex items-center gap-1.5">
-                                  <p className="text-xs font-semibold">{u.model || u.productName}</p>
-                                  {u.withBill === false && (
-                                    <span className="text-[9px] font-semibold text-red-600 border border-red-300 rounded px-1 py-0.5">
-                                      NO BILL
-                                    </span>
-                                  )}
-                                </div>
+                                <p className="text-xs font-semibold">{u.model || u.productName}</p>
                                 {u.batteryHealth && <p className="text-[10px] text-amber-600">Batt: {u.batteryHealth}</p>}
                                 {u.warranty && <p className="text-[10px] text-blue-600">Warranty: {u.warranty}</p>}
                               </td>

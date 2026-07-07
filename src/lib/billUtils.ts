@@ -91,11 +91,7 @@ export const calculateBillTotals = (
     subtotalAfterDiscount + totalTax + otherChargesRounded
   );
 
-  // Round off removed per client requirement: total is the exact calculated amount
-  const roundedTotal = rawTotal;
-  const roundOff = 0;
-
-  return { subtotal, totalTax, cgst, sgst, discount: discountAmount, roundOff, total: roundedTotal };
+  return { subtotal, totalTax, cgst, sgst, discount: discountAmount, roundOff: 0, total: rawTotal };
 };
 
 export const numberToWords = (num: number): string => {

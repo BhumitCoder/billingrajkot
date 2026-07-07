@@ -289,7 +289,6 @@ export interface InventoryUnit {
   color?: string;
   batteryHealth?: string;
   warranty?: string;
-  withBill?: boolean;
   vendorId?: string;
   vendorName?: string;
   purchaseBillId?: string;
@@ -405,7 +404,6 @@ export interface PurchaseBillItem {
   color?: string;
   batteryHealth?: string;
   warranty?: string;
-  withBill?: boolean;
   quantity: number;
   unit: string;
   rate: number;
@@ -477,6 +475,11 @@ export interface PurchaseBill {
   extractionErrors?: AIExtractionError[]; // Errors detected during AI extraction
   itemsAddedToInventory?: boolean; // Track if items were added to inventory
   inventoryAddedAt?: string; // When items were added to inventory
+  isInvoice?: boolean; // True when the vendor's original invoice (secondhand purchase) was uploaded
+  invoiceFileUrl?: string; // Firebase Storage download URL of the uploaded invoice (image or PDF)
+  invoiceStoragePath?: string; // Storage path, used to delete/replace the file
+  invoiceFileName?: string; // Original file name, used for downloads
+  invoiceFileType?: string; // MIME type of the uploaded invoice file
   createdAt: string;
   updatedAt: string;
 }

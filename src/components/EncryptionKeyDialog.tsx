@@ -24,8 +24,9 @@ import {
   verifyEncryptionKey,
   startEncryption,
   createRecoveryBlob,
+  restoreEncryptionFromRemote,
 } from "@/lib/crypto";
-import { hasUnencryptedData, saveKeyRecoveryBlob, saveEncryptionConfig } from "@/lib/storage";
+import { hasUnencryptedData, saveKeyRecoveryBlob, saveEncryptionConfig, getEncryptionConfig } from "@/lib/storage";
 import { getVerifyToken } from "@/lib/crypto";
 
 interface Props {
@@ -63,6 +64,20 @@ export function EncryptionKeyDialog({ open, onOpenChange }: Props) {
     const detect = async () => {
       if (isEncryptionActive() && !isEncryptionKeyLoaded()) { setState("locked"); return; }
       if (isEncryptionActive()) { setState("active"); return; }
+      // Local flags may not be restored yet (fresh browser, or the app-level restore on
+      // load hasn't finished/failed transiently) — try Firestore directly before concluding
+      // no encryption was ever set up, otherwise a slow/failed restore looks like "no-key".
+      if (!isEncryptionConfigured()) {
+        try {
+          const remote = await getEncryptionConfig();
+          if (remote) {
+            restoreEncryptionFromRemote(remote.verifyToken, remote.active);
+            refreshLock();
+          }
+        } catch { /* fall through to plain-data/no-key detection below */ }
+        if (isEncryptionActive() && !isEncryptionKeyLoaded()) { setState("locked"); return; }
+        if (isEncryptionActive()) { setState("active"); return; }
+      }
       const plainDataExists = await hasUnencryptedData();
       if (plainDataExists) { setState("has-plain-data"); return; }
       setState(isEncryptionConfigured() ? "key-set-inactive" : "no-key");

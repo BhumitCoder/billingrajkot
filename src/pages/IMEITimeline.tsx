@@ -197,7 +197,6 @@ export default function IMEITimeline() {
             selectedUnit.sellingPrice
               ? `Sell Price: ${formatCurrency(selectedUnit.sellingPrice)}`
               : "",
-            `Bill: ${selectedUnit.withBill === false ? "Without Bill" : "With Bill"}`,
           ].filter(Boolean),
         });
       }
@@ -372,7 +371,6 @@ export default function IMEITimeline() {
             selectedUnit.sellingPrice
               ? `Sell Price: ${formatCurrency(selectedUnit.sellingPrice)}`
               : "",
-            `Bill: ${selectedUnit.withBill === false ? "Without Bill" : "With Bill"}`,
           ].filter(Boolean),
         });
       }
@@ -504,16 +502,9 @@ export default function IMEITimeline() {
                     {""}
                   </p>
                   <div className="mt-2 flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <Badge variant="outline" className="text-[10px]">
-                        {u.status.replace(/_/g, " ").toUpperCase()}
-                      </Badge>
-                      {u.withBill === false && (
-                        <Badge variant="destructive" className="text-[10px]">
-                          NO BILL
-                        </Badge>
-                      )}
-                    </div>
+                    <Badge variant="outline" className="text-[10px]">
+                      {u.status.replace(/_/g, " ").toUpperCase()}
+                    </Badge>
                     <span className="text-[10px] text-muted-foreground">
                       {formatDate(u.updatedAt || u.createdAt)}
                     </span>
@@ -554,10 +545,6 @@ export default function IMEITimeline() {
                 <p>
                   <span className="font-semibold text-foreground">Status:</span>{" "}
                   {selectedUnit.status.replace(/_/g, " ")}
-                </p>
-                <p>
-                  <span className="font-semibold text-foreground">Bill:</span>{" "}
-                  {selectedUnit.withBill === false ? "Without Bill" : "With Bill"}
                 </p>
               </div>
             ) : null}

@@ -531,7 +531,9 @@ export function Layout({ children }: LayoutProps) {
             restoreEncryptionFromRemote(remote.verifyToken, remote.active);
             refreshLock();
           }
-        } catch { /* network error — skip, user will see locked/no-key state */ }
+        } catch (err) {
+          console.error("[encryption] remote config restore failed on load", err);
+        }
       }
       await initEncryptionKey();
       setEncInitDone(true);

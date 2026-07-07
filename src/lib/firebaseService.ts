@@ -855,15 +855,13 @@ export const saveBill = async (bill: Bill): Promise<void> => {
     const totalTax = roundToTwo(cgst + sgst);
 
     const rawTotal = roundToTwo(subtotalAfterDiscount + totalTax + courierCharges);
-    // Round off removed per client requirement: total is the exact calculated amount
-    const roundedTotal = rawTotal;
     bill.subtotal = subtotal;
     bill.cgst = isGstBill ? cgst : undefined;
     bill.sgst = isGstBill ? sgst : undefined;
     bill.totalTax = isGstBill ? totalTax : undefined;
     bill.discount = discount;
     bill.roundOff = 0;
-    bill.total = roundedTotal;
+    bill.total = rawTotal;
 
     // Apply stock adjustments
     for (const [productId, adjustment] of stockAdjustments.entries()) {
@@ -1356,6 +1354,45 @@ export const updatePurchaseBillImages = async (billId: string, images: string[])
     }
   } catch (error) {
     console.error("Error updating purchase bill images:", error);
+    throw error;
+  }
+};
+
+export const uploadPurchaseBillInvoice = async (
+  billId: string,
+  file: File
+): Promise<{ url: string; storagePath: string }> => {
+  try {
+    const userId = getUserId();
+    const ext = file.name.includes(".") ? file.name.split(".").pop() : "";
+    const storagePath = `purchase-bill-invoices/${userId}/${billId}${ext ? `.${ext}` : ""}`;
+    const storageRef = ref(storage, storagePath);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    return { url, storagePath };
+  } catch (error) {
+    console.error("Error uploading purchase bill invoice:", error);
+    throw error;
+  }
+};
+
+export const updatePurchaseBillInvoice = async (
+  billId: string,
+  invoice: { invoiceFileUrl?: string; invoiceStoragePath?: string; invoiceFileName?: string; invoiceFileType?: string; isInvoice: boolean }
+): Promise<void> => {
+  try {
+    const billRef = doc(db, COLLECTIONS.PURCHASE_BILLS, billId);
+    const billSnap = await getDoc(billRef);
+    if (billSnap.exists()) {
+      const bill = await decryptDoc(billSnap.data() as any) as PurchaseBill;
+      await setDoc(billRef, await encryptDoc(removeUndefined({
+        ...bill,
+        ...invoice,
+        updatedAt: new Date().toISOString(),
+      })));
+    }
+  } catch (error) {
+    console.error("Error updating purchase bill invoice:", error);
     throw error;
   }
 };
@@ -2468,7 +2505,6 @@ const calculateReturnAdjustedBillSnapshot = (
     0,
     roundToTwo(subtotal - discount + courierCharges + snapshotTax - amountOnlyDeduction),
   );
-  // Round off removed per client requirement: total is the exact calculated amount
   const roundedTotal = rawTotal;
   const roundOff = 0;
   const paidAmount = roundToTwo(bill.paidAmount || 0);
@@ -2795,7 +2831,6 @@ export interface InventoryItemInput {
   color?: string;
   batteryHealth?: string;
   warranty?: string;
-  withBill?: boolean;
   quantity: number;
   unit: string;
   purchasePrice: number;
@@ -2834,7 +2869,6 @@ const addInventoryUnitForPurchase = async (
   if (existingUnit) {
     const updates: Record<string, unknown> = { purchaseBillId: bill.id, purchasePrice: item.purchasePrice, updatedAt: now };
     if (item.repairCost && item.repairCost > 0) updates.repairCost = item.repairCost;
-    if (item.withBill !== undefined) updates.withBill = item.withBill;
     const newSn = item.serialNumber?.trim() || "";
     if (newSn && existingUnit.serialNumber !== newSn) updates.serialNumber = newSn;
     batch.set(doc(db, COLLECTIONS.INVENTORY_UNITS, existingUnit.id), await encryptDoc(removeUndefined({ ...existingUnit, ...updates })));
@@ -2863,7 +2897,6 @@ const addInventoryUnitForPurchase = async (
     color: item.color || product.color || "",
     batteryHealth: item.batteryHealth || undefined,
     warranty: item.warranty || undefined,
-    withBill: item.withBill,
     vendorId: item.vendorId || bill.vendorId || "",
     vendorName: bill.vendorName || "",
     purchaseBillId: bill.id,
@@ -3688,7 +3721,6 @@ export const updateBillAfterReturn = async (
       subtotal - discount + courierCharges + totalTax - amountOnlyDeduction,
       ),
     );
-    // Round off removed per client requirement: total is the exact calculated amount
     const roundedTotal = rawTotal;
     const roundOff = 0;
 
@@ -4505,8 +4537,10 @@ export const getEncryptionConfig = async (): Promise<{ active: boolean; verifyTo
     if (recoverySnap.exists()) {
       return { active: true, verifyToken: "" };
     }
+    console.warn("[encryption] no encMeta or keyRecovery doc found for user", userId);
     return null;
-  } catch {
+  } catch (err) {
+    console.error("[encryption] getEncryptionConfig failed", err);
     return null;
   }
 };

@@ -48,7 +48,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -140,7 +139,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const STORAGE_OPTIONS = ["32", "64", "128", "256", "512", "1TB", "2TB"];
 import { compressFile, getBase64SizeKB } from "@/lib/imageCompression";
-import { uploadPurchaseBillVendorImage, updatePurchaseBillImages } from "@/lib/firebaseService";
+import { uploadPurchaseBillVendorImage, updatePurchaseBillImages, uploadPurchaseBillInvoice, updatePurchaseBillInvoice } from "@/lib/firebaseService";
 import { toast as sonnerToast } from "sonner";
 import { downloadImage } from "@/lib/utils";
 import { ProductAutocomplete } from "@/components/ProductAutocomplete";
@@ -541,6 +540,8 @@ function PurchaseBills() {
   const [vendorIdSaving, setVendorIdSaving] = useState(false);
   const [vendorPreviewImage, setVendorPreviewImage] = useState<{ src: string; label: string } | null>(null);
   const vendorIdInputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
+  const [detailInvoiceUploading, setDetailInvoiceUploading] = useState(false);
+  const detailInvoiceInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedBillForPayment, setSelectedBillForPayment] =
     useState<PurchaseBill | null>(null);
@@ -587,7 +588,6 @@ function PurchaseBills() {
       barcode?: string;
       batteryHealth?: string;
       warranty?: string;
-      withBill?: boolean;
       vendorId?: string;
       productId?: string;
       isNewProduct?: boolean;
@@ -626,6 +626,9 @@ function PurchaseBills() {
   const [editRepairCosts, setEditRepairCosts] = useState<Array<{ itemIndex: number; amount: number; notes: string }>>([]);
   const [includeManualBillNotes, setIncludeManualBillNotes] = useState(false);
   const manualImageInputRef = useRef<HTMLInputElement>(null);
+  const [manualInvoiceFile, setManualInvoiceFile] = useState<File | null>(null);
+  const manualInvoiceInputRef = useRef<HTMLInputElement>(null);
+  const [invoiceUploading, setInvoiceUploading] = useState(false);
   const [manualVendorMode, setManualVendorMode] = useState<"select" | "create">(
     "select",
   );
@@ -654,6 +657,7 @@ function PurchaseBills() {
     courierCharges?: number;
     expenseAmount?: number;
     paymentMode?: string;
+    isInvoice?: boolean;
     items: PurchaseBillItem[];
   }>({
     billImage: "",
@@ -670,6 +674,7 @@ function PurchaseBills() {
     courierCharges: 0,
     expenseAmount: 0,
     paymentMode: "Cash",
+    isInvoice: false,
     items: [
       {
         description: "",
@@ -679,7 +684,6 @@ function PurchaseBills() {
         imeiNumber: "",
         storage: "",
         color: "",
-        withBill: true,
         quantity: 1,
         unit: "pcs",
         rate: 0,
@@ -1320,6 +1324,7 @@ function PurchaseBills() {
     setRepairCosts([]);
     setCollectPaymentOnCreate(false);
     setIncludeManualBillNotes(false);
+    setManualInvoiceFile(null);
     setCreatePayment({ amount: "", method: "Cash", bankAccountId: "", date: new Date().toISOString().split("T")[0], note: "" });
     setManualBill({
       billImage: "",
@@ -1336,6 +1341,7 @@ function PurchaseBills() {
       courierCharges: 0,
       expenseAmount: 0,
       paymentMode: "Cash",
+      isInvoice: false,
       items: [
         {
           description: "",
@@ -1490,7 +1496,6 @@ function PurchaseBills() {
           imeiNumber: "",
           storage: "",
           color: "",
-          withBill: true,
           quantity: 1,
           unit: "pcs",
           rate: 0,
@@ -1799,6 +1804,31 @@ function PurchaseBills() {
 
       const now = new Date().toISOString();
       const newBillId = crypto.randomUUID();
+
+      let invoiceFileUrl: string | undefined;
+      let invoiceStoragePath: string | undefined;
+      let invoiceFileName: string | undefined;
+      let invoiceFileType: string | undefined;
+      if (manualBill.isInvoice && manualInvoiceFile) {
+        try {
+          setInvoiceUploading(true);
+          const uploaded = await uploadPurchaseBillInvoice(newBillId, manualInvoiceFile);
+          invoiceFileUrl = uploaded.url;
+          invoiceStoragePath = uploaded.storagePath;
+          invoiceFileName = manualInvoiceFile.name;
+          invoiceFileType = manualInvoiceFile.type;
+        } catch (err) {
+          console.error("Failed to upload invoice:", err);
+          toast({
+            title: "Invoice upload failed",
+            description: "Bill will be saved without the invoice file.",
+            variant: "destructive",
+          });
+        } finally {
+          setInvoiceUploading(false);
+        }
+      }
+
       const newBill: PurchaseBill = {
         id: newBillId,
         billImage: manualBill.billImage || "",
@@ -1822,6 +1852,11 @@ function PurchaseBills() {
         paidAmount: 0,
         payments: [],
         extractionErrors: [],
+        isInvoice: !!manualBill.isInvoice,
+        invoiceFileUrl,
+        invoiceStoragePath,
+        invoiceFileName,
+        invoiceFileType,
         createdAt: now,
         updatedAt: now,
       };
@@ -2006,7 +2041,6 @@ function PurchaseBills() {
       color: (item as any).color || "",
       batteryHealth: (item as any).batteryHealth || undefined,
       warranty: (item as any).warranty || undefined,
-      withBill: (item as any).withBill !== false,
       // IMEI/serial items are always 1 unit each; non-serialized items use the actual bill quantity.
       quantity: ((item as any).imeiNumber || (item as any).serialNumber) ? 1 : (item.quantity || 1),
       unit: "pcs",
@@ -2086,7 +2120,6 @@ function PurchaseBills() {
         whereToBuy: (item as any).whereToBuy || bill.vendorName || "",
         weight: (item as any).weight || 0,
         weightUnit: (item as any).weightUnit || "g",
-        withBill: (item as any).withBill !== false,
         vendorId: bill.clientId || bill.vendorId || "",
         productId: existingProduct?.id,
         isNewProduct: !existingProduct,
@@ -2194,7 +2227,6 @@ function PurchaseBills() {
           color: item.color || "",
           batteryHealth: item.batteryHealth || undefined,
           warranty: item.warranty || undefined,
-          withBill: item.withBill !== false,
           hsnCode: item.hsnCode,
           barcode: item.barcode,
           vendorId: item.vendorId,
@@ -3435,6 +3467,30 @@ function PurchaseBills() {
                                   {bill.billImage ? "View Image" : "No Image"}
                                 </DropdownMenuItem>
 
+                                {bill.isInvoice && bill.invoiceFileUrl && (
+                                  <>
+                                    <DropdownMenuItem
+                                      onClick={() => window.open(bill.invoiceFileUrl, "_blank", "noopener,noreferrer")}
+                                      className="gap-2"
+                                    >
+                                      <FileText className="h-4 w-4" />
+                                      View Invoice
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        downloadImage(
+                                          bill.invoiceFileUrl!,
+                                          bill.invoiceFileName || `invoice-${bill.billNumber || bill.id}`,
+                                        )
+                                      }
+                                      className="gap-2"
+                                    >
+                                      <Download className="h-4 w-4" />
+                                      Download Invoice
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+
                                 {!bill.itemsAddedToInventory && (
                                   <DropdownMenuItem
                                     onClick={() => handleAddToInventory(bill)}
@@ -3843,6 +3899,59 @@ function PurchaseBills() {
                             />
                           )}
                         </div>
+                        <div className="space-y-2 md:col-span-2 lg:col-span-4">
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-border accent-primary"
+                              checked={!!manualBill.isInvoice}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setManualBill((prev) => ({ ...prev, isInvoice: checked }));
+                                if (!checked) setManualInvoiceFile(null);
+                              }}
+                            />
+                            <span className="text-sm font-medium">Have vendor's original invoice? (secondhand purchase)</span>
+                          </label>
+                          {manualBill.isInvoice && (
+                            <div className="flex items-center gap-2">
+                              <input
+                                ref={manualInvoiceInputRef}
+                                type="file"
+                                accept="image/*,application/pdf"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) setManualInvoiceFile(file);
+                                  e.target.value = "";
+                                }}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => manualInvoiceInputRef.current?.click()}
+                                className="gap-2"
+                              >
+                                <Upload className="h-3.5 w-3.5" />
+                                {manualInvoiceFile ? "Change File" : "Upload Invoice (Image/PDF)"}
+                              </Button>
+                              {manualInvoiceFile && (
+                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <FileText className="h-3.5 w-3.5" />
+                                  {manualInvoiceFile.name}
+                                  <button
+                                    type="button"
+                                    onClick={() => setManualInvoiceFile(null)}
+                                    className="ml-1 text-muted-foreground hover:text-destructive"
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                  </button>
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                         <div className="space-y-1">
                           <Label>Payment Mode</Label>
                           <Select
@@ -4021,18 +4130,6 @@ function PurchaseBills() {
                                   }
                                   placeholder="e.g. 1 Year, 6 Months"
                                 />
-                              </div>
-                              <div className="space-y-1 flex flex-col justify-end">
-                                <div className="flex items-center gap-2 pb-2">
-                                  <Checkbox
-                                    id={`withBill-${index}`}
-                                    checked={(item as any).withBill !== false}
-                                    onCheckedChange={(checked) =>
-                                      updateManualItem(index, "withBill" as any, checked === true)
-                                    }
-                                  />
-                                  <Label htmlFor={`withBill-${index}`} className="cursor-pointer">With Bill</Label>
-                                </div>
                               </div>
                               <div className="space-y-1">
                                 <Label>Rate *</Label>
@@ -5158,16 +5255,6 @@ function PurchaseBills() {
                                             className="h-8 text-sm"
                                             placeholder="Bought from (optional)"
                                           />
-                                          <div className="flex items-center gap-2 h-8">
-                                            <Checkbox
-                                              id={`edited-withBill-${index}`}
-                                              checked={(item as any).withBill !== false}
-                                              onCheckedChange={(checked) =>
-                                                updateEditedItem(index, "withBill" as any, checked === true)
-                                              }
-                                            />
-                                            <Label htmlFor={`edited-withBill-${index}`} className="cursor-pointer text-sm">With Bill</Label>
-                                          </div>
                                         </div>
                                       </div>
                                     ) : (
@@ -5185,7 +5272,6 @@ function PurchaseBills() {
                                               : null,
                                             (item as any).batteryHealth ? `Battery: ${(item as any).batteryHealth}` : null,
                                             (item as any).warranty ? `Warranty: ${(item as any).warranty}` : null,
-                                            (item as any).withBill === false ? "Without Bill" : "With Bill",
                                           ]
                                             .filter(Boolean)
                                             .map((line, idx) => (
@@ -5791,6 +5877,85 @@ function PurchaseBills() {
                         No Image
                       </Button>
                     )}
+                    {selectedBill.isInvoice && selectedBill.invoiceFileUrl && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="default"
+                          onClick={() => window.open(selectedBill.invoiceFileUrl, "_blank", "noopener,noreferrer")}
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          View Invoice
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="default"
+                          onClick={() =>
+                            downloadImage(
+                              selectedBill.invoiceFileUrl!,
+                              selectedBill.invoiceFileName || `invoice-${selectedBill.billNumber || selectedBill.id}`,
+                            )
+                          }
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download Invoice
+                        </Button>
+                      </>
+                    )}
+                    {!(selectedBill.isInvoice && selectedBill.invoiceFileUrl) && (
+                      <>
+                        <input
+                          ref={detailInvoiceInputRef}
+                          type="file"
+                          accept="image/*,application/pdf"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (!file || !selectedBill) return;
+                            setDetailInvoiceUploading(true);
+                            try {
+                              const uploaded = await uploadPurchaseBillInvoice(selectedBill.id, file);
+                              await updatePurchaseBillInvoice(selectedBill.id, {
+                                invoiceFileUrl: uploaded.url,
+                                invoiceStoragePath: uploaded.storagePath,
+                                invoiceFileName: file.name,
+                                invoiceFileType: file.type,
+                                isInvoice: true,
+                              });
+                              const updated: PurchaseBill = {
+                                ...selectedBill,
+                                isInvoice: true,
+                                invoiceFileUrl: uploaded.url,
+                                invoiceStoragePath: uploaded.storagePath,
+                                invoiceFileName: file.name,
+                                invoiceFileType: file.type,
+                              };
+                              setSelectedBill(updated);
+                              setBills((prev) => prev.map((b) => (b.id === selectedBill.id ? updated : b)));
+                              sonnerToast.success("Invoice attached");
+                            } catch {
+                              sonnerToast.error("Failed to upload invoice");
+                            } finally {
+                              setDetailInvoiceUploading(false);
+                            }
+                          }}
+                        />
+                        <Button
+                          variant="outline"
+                          size="default"
+                          disabled={detailInvoiceUploading}
+                          onClick={() => detailInvoiceInputRef.current?.click()}
+                        >
+                          {detailInvoiceUploading ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Upload className="h-4 w-4 mr-2" />
+                          )}
+                          Attach Invoice
+                        </Button>
+                      </>
+                    )}
                     <Button
                       size="default"
                       variant={
@@ -6358,20 +6523,6 @@ function PurchaseBills() {
                               className="h-9"
                               placeholder="e.g. 1 Year, 6 Months"
                             />
-                          </div>
-                          <div className="space-y-1 flex flex-col justify-end">
-                            <div className="flex items-center gap-2 h-9">
-                              <Checkbox
-                                id={`inv-withBill-${index}`}
-                                checked={item.withBill !== false}
-                                onCheckedChange={(checked) => {
-                                  const newItems = [...inventoryItems];
-                                  newItems[index].withBill = checked === true;
-                                  setInventoryItems(newItems);
-                                }}
-                              />
-                              <Label htmlFor={`inv-withBill-${index}`} className="text-xs cursor-pointer">With Bill</Label>
-                            </div>
                           </div>
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">

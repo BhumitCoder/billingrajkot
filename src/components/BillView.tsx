@@ -424,7 +424,7 @@ export const BillPDF = ({
             <View style={[{ padding: 5, ...bdrB }]}>
               <Text style={[P.bold, P.sm, { marginBottom: 2 }]}>Total in words</Text>
               <Text style={[P.sm, { lineHeight: 1.4 }]}>
-                {String(numberToWords(Math.round(bill.total))).toUpperCase()} RUPEES ONLY
+                {String(numberToWords(bill.total)).toUpperCase()} RUPEES ONLY
               </Text>
             </View>
 
@@ -573,6 +573,12 @@ export const BillPDF = ({
                 <View style={[P.row, { justifyContent: "space-between", marginBottom: 2 }]}>
                   <Text style={[P.sm, { color: "#1e40af" }]}>SGST ({((bill as any).gstRate ?? 0) / 2}%)</Text>
                   <Text style={[P.sm, P.bold, { color: "#1e40af" }]}>{formatCurrency((bill as any).sgst)}</Text>
+                </View>
+              )}
+              {bill.roundOff !== 0 && (
+                <View style={[P.row, { justifyContent: "space-between", marginBottom: 2 }]}>
+                  <Text style={P.sm}>Round Off</Text>
+                  <Text style={[P.sm, P.bold]}>{formatCurrency(bill.roundOff)}</Text>
                 </View>
               )}
               <View style={[P.row, { justifyContent: "space-between", borderTopWidth: 1, borderTopStyle: "solid", borderTopColor: "#000", paddingTop: 3, marginTop: 2 }]}>
@@ -1293,7 +1299,7 @@ export function BillView({ bill }: BillViewProps) {
                       GUARANTEES PROVIDED BY THE SUPPLIER OF THESE DIAMONDS.
                     </p>
                     <p className="text-[10px] leading-relaxed mt-1">
-                      TOTAL US DOLLARS : {numberToWords(Math.round(bill.total))}
+                      TOTAL US DOLLARS : {numberToWords(bill.total)}
                     </p>
                     <p className="text-[10px] leading-relaxed mt-1">
                       WE INTEND TO CLAIM BENEFIT UNDER RoDTEP SCHEME AS
@@ -1598,7 +1604,7 @@ export function BillView({ bill }: BillViewProps) {
                           <div style={{ padding: "6px", borderBottom: "1px solid black" }}>
                             <p className="text-[10px] font-bold" style={{ marginBottom: "2px" }}>Total in words</p>
                             <p className="text-[10px] leading-snug">
-                              {String(numberToWords(Math.round(bill.total))).toUpperCase()} RUPEES ONLY
+                              {String(numberToWords(bill.total)).toUpperCase()} RUPEES ONLY
                             </p>
                           </div>
 
@@ -1732,6 +1738,12 @@ export function BillView({ bill }: BillViewProps) {
                               <div className="flex justify-between text-[10px] mb-1 text-blue-700">
                                 <span>SGST ({((bill as any).gstRate ?? 0) / 2}%)</span>
                                 <span className="font-bold">{formatCurrency((bill as any).sgst)}</span>
+                              </div>
+                            )}
+                            {bill.roundOff !== 0 && (
+                              <div className="flex justify-between text-[10px] mb-1">
+                                <span>Round Off</span>
+                                <span className="font-bold">{formatCurrency(bill.roundOff)}</span>
                               </div>
                             )}
                             <div className="flex justify-between text-[10px] font-bold border-t border-black pt-1 mt-1">

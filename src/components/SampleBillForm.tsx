@@ -1106,6 +1106,15 @@ export function SampleBillForm({ bill, isEdit = false }: SampleBillFormProps) {
                 </span>
               </div>
             )}
+            {totals.roundOff !== 0 && (
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Round Off:</span>
+                <span>
+                  {totals.roundOff > 0 ? "+" : ""}₹
+                  {formatToTwoDecimals(totals.roundOff)}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between text-2xl font-bold border-t pt-2">
               <span>Total:</span>
               <span>₹{formatToTwoDecimals(totals.total)}</span>

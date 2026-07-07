@@ -13,10 +13,7 @@
       "Skill(artifact-design:*)",
       "Bash(awk 'NR>=637 && NR<=1051' /Users/arpanbajpai/inventory-and-bill-management/src/lib/firebaseService.ts)",
       "Bash(awk -F: '$1 >= 3580 && $1 <= 3620 {print}')",
-      "Bash(awk -F: '$1 >= 3650 && $1 <= 3680 {print}')",
-      "Bash(npx tsc *)",
-      "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(awk -F: '$1 >= 3650 && $1 <= 3680 {print}')"
     ]
   }
 }

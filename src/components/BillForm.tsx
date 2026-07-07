@@ -1404,6 +1404,12 @@ export function BillForm({ bill, isEdit = false }: BillFormProps) {
                   <span>₹{totals.sgst.toFixed(2)}</span>
                 </div>
               )}
+              {totals.roundOff !== 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Round Off</span>
+                  <span>{totals.roundOff > 0 ? "+" : ""}₹{totals.roundOff.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between font-bold text-sm pt-1.5 border-t">
                 <span>Total</span>
                 <span className="text-primary">₹{totals.total.toFixed(2)}</span>

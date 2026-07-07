@@ -549,8 +549,7 @@ export default function Returns() {
       0,
       subtotal - discount + courierCharges + gstTotal - (isItemWise ? 0 : amountOnlyReturn),
     );
-    // Round off removed per client requirement: total is the exact calculated amount
-    const projectedTotal = rawTotal;
+    const projectedTotal = Math.round(rawTotal * 100) / 100;
     const paidAmount = Number(bill.paidAmount || 0);
     const effectiveReturnAmount = isItemWise
       ? calculateReturnAmount(bill, items)

@@ -5,7 +5,7 @@
   },
   "hosting": {
     "public": "dist",
-    "site":"ibellmobileshop",
+    "site":"invoicemitra-rajkot",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -17,6 +17,7 @@
         "destination": "/index.html"
       }
     ]
+    
   },
   "storage": {
     "rules": "storage.rules"

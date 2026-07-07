@@ -23,6 +23,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+src/lib/firebase.ts
 .firebase/
 .firebaserc
 firebase-debug.log

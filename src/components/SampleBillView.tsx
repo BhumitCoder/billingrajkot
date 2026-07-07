@@ -496,7 +496,7 @@ Thank you!`;
                   PROVIDED BY THE SUPPLIER OF THESE DIAMONDS.
                 </p>
                 <p className="text-[10px] leading-relaxed mt-1">
-                  TOTAL US DOLLARS : {numberToWords(Math.round(bill.total))}
+                  TOTAL US DOLLARS : {numberToWords(bill.total)}
                 </p>
                 <p className="text-[10px] leading-relaxed mt-1">
                   WE INTEND TO CLAIM BENEFIT UNDER RoDTEP SCHEME AS APPLICABLE
@@ -792,6 +792,17 @@ Thank you!`;
                           </td>
                         </tr>
                       )}
+                    {bill.roundOff !== undefined && bill.roundOff !== 0 && (
+                      <tr>
+                        <td className="border border-black p-1.5 text-right">
+                          Round Off
+                        </td>
+                        <td className="border border-black p-1.5 text-right whitespace-nowrap">
+                          {bill.roundOff >= 0 ? "+" : ""}
+                          {formatToTwoDecimals(bill.roundOff)}
+                        </td>
+                      </tr>
+                    )}
                     <tr
                       className="font-bold"
                       style={{
