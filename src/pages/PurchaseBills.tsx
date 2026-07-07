@@ -50,6 +50,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -626,6 +627,10 @@ function PurchaseBills() {
   const [editRepairCosts, setEditRepairCosts] = useState<Array<{ itemIndex: number; amount: number; notes: string }>>([]);
   const [includeManualBillNotes, setIncludeManualBillNotes] = useState(false);
   const manualImageInputRef = useRef<HTMLInputElement>(null);
+  const [manualHasOriginalBill, setManualHasOriginalBill] = useState(false);
+  const editImageInputRef = useRef<HTMLInputElement>(null);
+  const [editImageCompressing, setEditImageCompressing] = useState(false);
+  const [editHasOriginalBill, setEditHasOriginalBill] = useState(false);
   const [manualInvoiceFile, setManualInvoiceFile] = useState<File | null>(null);
   const manualInvoiceInputRef = useRef<HTMLInputElement>(null);
   const [invoiceUploading, setInvoiceUploading] = useState(false);
@@ -1325,6 +1330,7 @@ function PurchaseBills() {
     setCollectPaymentOnCreate(false);
     setIncludeManualBillNotes(false);
     setManualInvoiceFile(null);
+    setManualHasOriginalBill(false);
     setCreatePayment({ amount: "", method: "Cash", bankAccountId: "", date: new Date().toISOString().split("T")[0], note: "" });
     setManualBill({
       billImage: "",
@@ -1556,6 +1562,50 @@ function PurchaseBills() {
       });
     } finally {
       setIsCompressing(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleEditImageSelect = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Error",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setEditImageCompressing(true);
+    try {
+      const compressedBase64 = await compressFile(file, 900);
+      const sizeKB = getBase64SizeKB(compressedBase64);
+      if (sizeKB > 1000) {
+        toast({
+          title: "Image Too Large",
+          description: `Image is ${sizeKB.toFixed(0)} KB. Please try another image.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setEditedBill((prev) => (prev ? { ...prev, billImage: compressedBase64 } : prev));
+      toast({
+        title: "Image Added",
+        description: "Image attached successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to process image",
+        variant: "destructive",
+      });
+    } finally {
+      setEditImageCompressing(false);
       e.target.value = "";
     }
   };
@@ -2422,6 +2472,7 @@ function PurchaseBills() {
           : clone.vendorName || "",
     }));
     setEditedBill(clone);
+    setEditHasOriginalBill(!!clone.billImage);
     // Populate editRepairCosts from existing repairCost fields on items
     setEditRepairCosts(
       (clone.items || []).reduce<Array<{ itemIndex: number; amount: number; notes: string }>>((acc, item, idx) => {
@@ -2435,11 +2486,13 @@ function PurchaseBills() {
 
   const addEditedItemRow = () => {
     if (!editedBill) return;
+    const sn = getNextSN();
     const newItem: PurchaseBillItem = {
       description: "",
       hsnCode: "",
       itemNo: "",
       model: "",
+      serialNumber: sn,
       imeiNumber: "",
       storage: "",
       color: "",
@@ -2835,6 +2888,13 @@ function PurchaseBills() {
             accept="image/*"
             className="hidden"
             onChange={handleManualImageSelect}
+          />
+          <input
+            ref={editImageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleEditImageSelect}
           />
           <input
             ref={fileInputRef}
@@ -4364,49 +4424,59 @@ function PurchaseBills() {
 
                         <div className="rounded-md border p-3 space-y-3">
                           <div className="flex items-center justify-between">
-                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                              Image
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() => manualImageInputRef.current?.click()}
-                                disabled={isCompressing}
-                              >
-                                {isCompressing ? (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Upload className="mr-2 h-4 w-4" />
-                                )}
-                                {manualBill.billImage ? "Replace" : "Upload"}
-                              </Button>
-                              {manualBill.billImage && (
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                              <Checkbox
+                                checked={manualHasOriginalBill}
+                                onCheckedChange={(checked) => setManualHasOriginalBill(checked === true)}
+                              />
+                              <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                                Have Original Bill
+                              </span>
+                            </label>
+                            {manualHasOriginalBill && (
+                              <div className="flex items-center gap-2">
                                 <Button
                                   type="button"
                                   size="sm"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    setManualBill((prev) => ({ ...prev, billImage: "" }))
-                                  }
+                                  variant="outline"
+                                  onClick={() => manualImageInputRef.current?.click()}
+                                  disabled={isCompressing}
                                 >
-                                  Remove
+                                  {isCompressing ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Upload className="mr-2 h-4 w-4" />
+                                  )}
+                                  {manualBill.billImage ? "Replace" : "Upload"}
                                 </Button>
-                              )}
-                            </div>
+                                {manualBill.billImage && (
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() =>
+                                      setManualBill((prev) => ({ ...prev, billImage: "" }))
+                                    }
+                                  >
+                                    Remove
+                                  </Button>
+                                )}
+                              </div>
+                            )}
                           </div>
 
-                          {manualBill.billImage ? (
-                            <img
-                              src={manualBill.billImage}
-                              alt="Bill preview"
-                              className="h-36 w-full rounded-md border object-cover"
-                            />
-                          ) : (
-                            <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
-                              No image attached
-                            </div>
+                          {manualHasOriginalBill && (
+                            manualBill.billImage ? (
+                              <img
+                                src={manualBill.billImage}
+                                alt="Bill preview"
+                                className="h-36 w-full rounded-md border object-cover"
+                              />
+                            ) : (
+                              <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+                                No image attached
+                              </div>
+                            )
                           )}
                         </div>
                       </CardContent>
@@ -4942,6 +5012,76 @@ function PurchaseBills() {
                         )}
                       </CardContent>
                     </Card>
+
+                    {/* Original Bill Image (edit mode only — view mode has the "View Original Bill" footer button) */}
+                    {isEditing && (
+                      <Card className="overflow-hidden shadow-sm">
+                        <CardHeader className="bg-muted/40 px-5 py-3.5">
+                          <CardTitle className="text-sm sm:text-base font-semibold">
+                            Original Bill
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-5 px-5 pb-5">
+                          <div className="rounded-md border p-3 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <label className="flex items-center gap-2 cursor-pointer select-none">
+                                <Checkbox
+                                  checked={editHasOriginalBill}
+                                  onCheckedChange={(checked) => setEditHasOriginalBill(checked === true)}
+                                />
+                                <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                                  Have Original Bill
+                                </span>
+                              </label>
+                              {editHasOriginalBill && (
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => editImageInputRef.current?.click()}
+                                    disabled={editImageCompressing}
+                                  >
+                                    {editImageCompressing ? (
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <Upload className="mr-2 h-4 w-4" />
+                                    )}
+                                    {editedBill?.billImage ? "Replace" : "Upload"}
+                                  </Button>
+                                  {editedBill?.billImage && (
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() =>
+                                        setEditedBill((prev) => (prev ? { ...prev, billImage: "" } : prev))
+                                      }
+                                    >
+                                      Remove
+                                    </Button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            {editHasOriginalBill && (
+                              editedBill?.billImage ? (
+                                <img
+                                  src={editedBill.billImage}
+                                  alt="Bill preview"
+                                  className="h-36 w-full rounded-md border object-cover"
+                                />
+                              ) : (
+                                <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+                                  No image attached
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
 
                     {/* Payment History */}
                     <Card className="overflow-hidden shadow-sm">
