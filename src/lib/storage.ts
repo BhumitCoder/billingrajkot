@@ -48,6 +48,7 @@ export {
   updatePurchaseBillOverdueStatus,
   updatePurchaseBill,
   syncBillPricesToInventory,
+  addInventoryUnitsForNewEditedItems,
   checkStockAvailability,
   validateBillStock,
   getBillReturns,

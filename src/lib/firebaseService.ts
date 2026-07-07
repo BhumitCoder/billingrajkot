@@ -3123,6 +3123,93 @@ const createNewProduct = async (
   }
 };
 
+// When a purchase bill is edited to add brand-new items after itemsAddedToInventory was
+// already set (which makes addPurchaseItemsToInventory a no-op for the whole bill),
+// this creates inventory units + product stock only for items that have no matching unit
+// yet. Already-synced items are left untouched — syncBillPricesToInventory handles their
+// price updates separately, so this never double-counts existing stock.
+export const addInventoryUnitsForNewEditedItems = async (
+  bill: PurchaseBill
+): Promise<{ added: number }> => {
+  try {
+    const userId = getUserId();
+    const products = await getProducts();
+    const existingUnits = await getInventoryUnits();
+    const batch = writeBatch(db);
+    let added = 0;
+
+    const matchesIdentifier = (u: InventoryUnit, identifier: string) =>
+      normalizeImei(u.imeiNormalized || u.imeiNumber) === identifier ||
+      (Boolean(u.serialNumber) && normalizeImei(u.serialNumber) === identifier);
+
+    for (const item of bill.items) {
+      const normalizedImei = normalizeImei(item.imeiNumber);
+      const sn = (item.serialNumber || "").trim();
+      const normalizedSn = sn ? normalizeImei(sn) : "";
+      const identifier = normalizedImei || normalizedSn;
+      if (!identifier) continue; // only serialized (IMEI/SN) items get inventory units
+
+      // A unit already exists for this bill+identifier (created at original save, or a
+      // previous edit) — regardless of its current status (in_stock/sold/returned).
+      // Skip it: its stock contribution was already counted, so re-processing here
+      // would double-count. syncBillPricesToInventory keeps its price fields current.
+      const unitForThisBill = existingUnits.find(
+        (u) => u.purchaseBillId === bill.id && matchesIdentifier(u, identifier),
+      );
+      if (unitForThisBill) continue;
+
+      // Guard against creating a duplicate active unit for a device that's currently
+      // in stock under a *different* bill (same safety check addPurchaseItemsToInventory
+      // applies at creation time).
+      const activeElsewhere = existingUnits.find(
+        (u) =>
+          matchesIdentifier(u, identifier) &&
+          (u.status === "in_stock" || u.status === "reserved") &&
+          u.purchaseBillId !== bill.id,
+      );
+      if (activeElsewhere) continue;
+
+      const inventoryItem: InventoryItemInput = {
+        description: item.description,
+        itemNo: item.itemNo,
+        model: item.model,
+        imeiNumber: item.imeiNumber,
+        serialNumber: item.serialNumber,
+        storage: item.storage,
+        color: item.color,
+        batteryHealth: item.batteryHealth,
+        warranty: item.warranty,
+        quantity: item.quantity,
+        unit: item.unit,
+        purchasePrice: item.rate,
+        sellingPrice: item.sellingPrice,
+      };
+
+      const itemMasterKey = buildProductMasterKey(inventoryItem);
+      const existingProduct = products.find(
+        (p) =>
+          buildProductMasterKey(p) === itemMasterKey ||
+          p.name.toLowerCase() === (item.description || "").toLowerCase(),
+      );
+
+      if (existingProduct) {
+        await updateExistingProduct(existingProduct, inventoryItem, bill, batch, userId, existingUnits);
+      } else {
+        await createNewProduct(inventoryItem, bill, batch, userId, existingUnits);
+      }
+      added++;
+    }
+
+    if (added > 0) {
+      await batch.commit();
+    }
+    return { added };
+  } catch (error) {
+    console.error("Error adding inventory units for newly edited items:", error);
+    throw error;
+  }
+};
+
 export const isPurchaseBillDuplicate = async (
   billNumber: string,
   vendorName: string,

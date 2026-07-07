@@ -21,6 +21,7 @@ import {
   isPurchaseBillInventoryAdded,
   updatePurchaseBill,
   syncBillPricesToInventory,
+  addInventoryUnitsForNewEditedItems,
   InventoryItemInput,
   getCompanyProfile,
   incrementSnCounter,
@@ -2641,6 +2642,7 @@ function PurchaseBills() {
 
       await updatePurchaseBill(updatedBill);
       await syncBillPricesToInventory(updatedBill);
+      await addInventoryUnitsForNewEditedItems(updatedBill);
       const [, syncedUnits] = await Promise.all([loadBills(), getInventoryUnits()]);
       setInventoryUnits(syncedUnits);
       if (selectedBill && selectedBill.id === updatedBill.id) {
