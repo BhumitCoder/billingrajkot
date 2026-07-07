@@ -93,10 +93,10 @@ export function PWAInstallPrompt() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Download className="h-5 w-5 text-primary" />
-            Install Ibell App
+            Install MAA App
           </DialogTitle>
           <DialogDescription>
-            Install Ibell on your device for quick access and offline
+            Install MAA on your device for quick access and offline
             functionality. Get the full app experience!
           </DialogDescription>
         </DialogHeader>

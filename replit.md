@@ -1,4 +1,4 @@
-# Ibell - Invoice Management System
+# MAA - Invoice Management System
 
 ## Overview
 

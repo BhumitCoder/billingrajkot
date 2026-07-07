@@ -80,8 +80,8 @@ export default defineConfig(({ mode }) => ({
       },
       includeAssets: ["pwa-512x512.png"],
       manifest: {
-        name: "Ibell - GST Billing Software",
-        short_name: "Ibell",
+        name: "MAA - GST Billing Software",
+        short_name: "MAA",
         description: "Complete GST billing solution with inventory management",
         theme_color: "#1a1a2e",
         background_color: "#1a1a2e",

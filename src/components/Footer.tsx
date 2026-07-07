@@ -45,7 +45,7 @@ export function Footer() {
               )}
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-lg sm:text-xl text-foreground break-words">
-                  {company?.name || "Ibell"}
+                  {company?.name || "MAA"}
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   Invoice Management
@@ -215,7 +215,7 @@ export function Footer() {
         <div className="mt-10 pt-8 border-t border-border">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground text-center sm:text-left">
-              © {new Date().getFullYear()} {company?.name || "Ibell"}. All
+              © {new Date().getFullYear()} {company?.name || "MAA"}. All
               rights reserved.
             </p>
             <p className="text-sm text-muted-foreground text-center sm:text-right">

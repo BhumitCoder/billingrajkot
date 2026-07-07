@@ -138,7 +138,7 @@ export const PLReportPDF = ({ stats, company, dateRange }: PLReportProps) => (
     <Page size="A4" style={styles.page}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.companyName}>{company?.name || 'Ibell'}</Text>
+        <Text style={styles.companyName}>{company?.name || 'MAA'}</Text>
         <Text style={styles.reportTitle}>Profit & Loss Statement (Financial Report)</Text>
         <Text style={styles.period}>
           Reporting Period: {dateRange.start ? formatDatePDF(dateRange.start) : 'All Time'} - {dateRange.end ? formatDatePDF(dateRange.end) : 'Present'}
@@ -216,7 +216,7 @@ export const PLReportPDF = ({ stats, company, dateRange }: PLReportProps) => (
 
       {/* Footer */}
       <Text style={styles.footer}>
-        This is a computer-generated document. Generated on: {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')} | {company?.name || 'Ibell'}
+        This is a computer-generated document. Generated on: {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')} | {company?.name || 'MAA'}
       </Text>
     </Page>
   </Document>

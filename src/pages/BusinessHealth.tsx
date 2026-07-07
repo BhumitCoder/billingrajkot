@@ -198,7 +198,7 @@ const HealthPDF = ({ data, dateRange }: any) => (
         <View style={pdfStyles.headerMain}>
           <Text style={pdfStyles.title}>Business Health Report</Text>
           <Text style={{ fontSize: 12, fontWeight: "bold", color: "#3b82f6" }}>
-            Ibell
+            MAA
           </Text>
         </View>
         <Text style={pdfStyles.dateRange}>
@@ -491,14 +491,14 @@ export default function BusinessHealth() {
     const computedStart =
       filterMode === "all" && allRelevantDates.length > 0
         ? startOfDay(
-            new Date(Math.min(...allRelevantDates.map((d) => d.getTime()))),
-          )
+          new Date(Math.min(...allRelevantDates.map((d) => d.getTime()))),
+        )
         : requestedStart;
     const computedEnd =
       filterMode === "all" && allRelevantDates.length > 0
         ? endOfDay(
-            new Date(Math.max(...allRelevantDates.map((d) => d.getTime()))),
-          )
+          new Date(Math.max(...allRelevantDates.map((d) => d.getTime()))),
+        )
         : requestedEnd;
 
     // Granular Analysis: User, Client, Vendor
@@ -839,10 +839,10 @@ export default function BusinessHealth() {
         cashFlow: Math.max(
           0,
           100 -
-            (filteredBills.filter((b: any) => b.paymentStatus !== "paid")
-              .length /
-              (filteredBills.length || 1)) *
-              50,
+          (filteredBills.filter((b: any) => b.paymentStatus !== "paid")
+            .length /
+            (filteredBills.length || 1)) *
+          50,
         ),
         inventoryTurnover: Math.min(100, turnover * 15),
         creditRisk: roundToTwoDecimals(creditRisk),
@@ -1612,7 +1612,7 @@ export default function BusinessHealth() {
                         <p className="text-lg md:text-xl font-semibold text-white break-words">
                           {formatCurrency(
                             healthData.summary.totalReturns -
-                              healthData.summary.totalPurchaseReturns,
+                            healthData.summary.totalPurchaseReturns,
                           )}
                         </p>
                         <p className="text-[9px] text-slate-500 mt-2 uppercase">
@@ -1653,7 +1653,7 @@ export default function BusinessHealth() {
                             .slice(0, 3)
                             .reduce((s: number, c: any) => s + c.sales, 0) /
                             (healthData.summary.totalSales || 1)) *
-                            100,
+                          100,
                         )}
                         %
                       </p>
@@ -1670,7 +1670,7 @@ export default function BusinessHealth() {
                       <p className="mt-1 text-2xl font-bold text-emerald-700">
                         {formatCurrency(
                           healthData.userAnalysis[0]?.sales /
-                            (healthData.userAnalysis[0]?.count || 1),
+                          (healthData.userAnalysis[0]?.count || 1),
                         )}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
@@ -1931,7 +1931,7 @@ export default function BusinessHealth() {
                             const percentage = roundToTwoDecimals(
                               (segment.value /
                                 (healthData.clientAnalysis.length || 1)) *
-                                100,
+                              100,
                             );
                             const tone =
                               segment.name === "Active"
@@ -2013,7 +2013,7 @@ export default function BusinessHealth() {
                                       0,
                                     ) /
                                     (healthData.summary.totalSales || 1)) *
-                                    100,
+                                  100,
                                 )}
                                 %
                               </span>
@@ -2039,7 +2039,7 @@ export default function BusinessHealth() {
                               <span className="font-semibold">
                                 {formatCurrency(
                                   healthData.userAnalysis[0]?.sales /
-                                    (healthData.userAnalysis[0]?.count || 1),
+                                  (healthData.userAnalysis[0]?.count || 1),
                                 )}
                               </span>
                               . Replicate this pattern through playbook sharing.

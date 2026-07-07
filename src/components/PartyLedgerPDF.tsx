@@ -274,7 +274,7 @@ export function PartyLedgerPDF({
     fmtDate(now.toISOString()) +
     "  " +
     now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-  const coName = companyProfile?.name || "Ibell";
+  const coName = companyProfile?.name || "MAA";
 
   const netBal = stats.netBalance;
   const owesYou = netBal >= 0;

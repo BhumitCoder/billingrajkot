@@ -19,7 +19,7 @@ export const exportDashboardToExcel = (
   // ========== SHEET 1: EXECUTIVE SUMMARY ==========
   const summaryData = [
     ["DASHBOARD EXECUTIVE SUMMARY"],
-    ["Company:", company?.name || "Ibell"],
+    ["Company:", company?.name || "MAA"],
     ["Report Generated:", format(new Date(), "dd-MM-yyyy HH:mm:ss")],
     [
       "Period:",

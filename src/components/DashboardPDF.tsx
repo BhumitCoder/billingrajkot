@@ -199,7 +199,7 @@ export const DashboardPDF = ({
     {/* PAGE 1: EXECUTIVE SUMMARY */}
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
-        <Text style={styles.companyName}>{company?.name || "Ibell"}</Text>
+        <Text style={styles.companyName}>{company?.name || "MAA"}</Text>
         <Text style={styles.reportTitle}>Dashboard Executive Summary</Text>
         <Text style={styles.period}>
           Period: {dateRange.start ? formatDate(dateRange.start) : "All Time"} -{" "}
@@ -410,14 +410,14 @@ export const DashboardPDF = ({
       <View style={styles.section}></View>
 
       <Text style={styles.footer}>
-        {company?.name || "Ibell"} | Page 1 of 4
+        {company?.name || "MAA"} | Page 1 of 4
       </Text>
     </Page>
 
     {/* PAGE 2: PAYMENT STATUS & INVENTORY */}
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
-        <Text style={styles.companyName}>{company?.name || "Ibell"}</Text>
+        <Text style={styles.companyName}>{company?.name || "MAA"}</Text>
         <Text style={styles.reportTitle}>
           Payment Status & Inventory Analysis
         </Text>
@@ -605,14 +605,14 @@ export const DashboardPDF = ({
       </View>
 
       <Text style={styles.footer}>
-        {company?.name || "Ibell"} | Page 2 of 4
+        {company?.name || "MAA"} | Page 2 of 4
       </Text>
     </Page>
 
     {/* PAGE 3: PRODUCT PERFORMANCE */}
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
-        <Text style={styles.companyName}>{company?.name || "Ibell"}</Text>
+        <Text style={styles.companyName}>{company?.name || "MAA"}</Text>
         <Text style={styles.reportTitle}>Product Performance Analysis</Text>
       </View>
 
@@ -720,14 +720,14 @@ export const DashboardPDF = ({
       )}
 
       <Text style={styles.footer}>
-        {company?.name || "Ibell"} | Page 3 of 4
+        {company?.name || "MAA"} | Page 3 of 4
       </Text>
     </Page>
 
     {/* PAGE 4: CLIENT ANALYSIS */}
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
-        <Text style={styles.companyName}>{company?.name || "Ibell"}</Text>
+        <Text style={styles.companyName}>{company?.name || "MAA"}</Text>
         <Text style={styles.reportTitle}>Client Performance Analysis</Text>
       </View>
 
@@ -832,7 +832,7 @@ export const DashboardPDF = ({
       )}
 
       <Text style={styles.footer}>
-        {company?.name || "Ibell"} | Page 4 of 4 | Report generated on{" "}
+        {company?.name || "MAA"} | Page 4 of 4 | Report generated on{" "}
         {new Date().toLocaleDateString("en-IN")}
       </Text>
     </Page>

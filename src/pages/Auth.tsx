@@ -60,7 +60,7 @@ export default function Auth() {
 
   useEffect(() => {
     // Load company profile — fails gracefully if rules block unauthenticated reads
-    getCompanyProfile().then(setCompany).catch(() => {});
+    getCompanyProfile().then(setCompany).catch(() => { });
 
     // If already signed in to Firebase, check if app session is valid
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -180,7 +180,7 @@ export default function Auth() {
               <img src={company.logo} alt="Company Logo" className="h-16 md:h-20 mx-auto object-contain mb-4" />
             )}
             <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-              {company?.name || "Ibell"}
+              {company?.name || "MAA"}
             </h1>
             <p className="text-muted-foreground">Invoice Management System</p>
           </div>
@@ -287,9 +287,9 @@ export const isAuthenticated = (): Promise<boolean> => {
 export const logout = async (): Promise<void> => {
   const sessionId = localStorage.getItem(SESSION_ID_KEY);
   // Firestore writes must happen before signOut (rules require auth token)
-  if (sessionId) await removeSession(sessionId).catch(() => {});
+  if (sessionId) await removeSession(sessionId).catch(() => { });
   try { await setUserPreference(AUTH_KEY, "false"); } catch { /* best-effort */ }
-  await signOut(auth).catch(() => {});
+  await signOut(auth).catch(() => { });
   localStorage.removeItem(AUTH_KEY);
   localStorage.removeItem(SESSION_EXPIRY_KEY);
   localStorage.removeItem(USER_ROLE_KEY);

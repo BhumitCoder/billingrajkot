@@ -313,9 +313,9 @@ export const PurchaseBillPDF: React.FC<PurchaseBillPDFProps> = ({ bill }) => {
         <View style={styles.headerContainer}>
           <View style={styles.companyHeader}>
             <View style={styles.companyInfo}>
-              <Text style={styles.companyName}>Ibell</Text>
+              <Text style={styles.companyName}>MAA</Text>
               <Text style={styles.companyTagline}>
-                Ibell Invoice Management System
+                MAA Invoice Management System
               </Text>
             </View>
             <View>
@@ -621,8 +621,8 @@ export const PurchaseBillPDF: React.FC<PurchaseBillPDFProps> = ({ bill }) => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerBold}>Ibell</Text>
-          <Text style={styles.footerText}>Ibell Invoice Management System</Text>
+          <Text style={styles.footerBold}>MAA</Text>
+          <Text style={styles.footerText}>MAA Invoice Management System</Text>
           <Text style={[styles.footerText, { marginTop: 3 }]}>
             This is a computer-generated document. No signature required.
           </Text>

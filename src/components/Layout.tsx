@@ -411,22 +411,22 @@ function AppSidebarContent({
 
             {/* Global actions */}
             <ShortcutSection title="Global Actions">
-              <ShortcutRow label="New Sale"        modifier="Alt"  keys={["N"]} note="Open new bill" />
-              <ShortcutRow label="Toggle Theme"    modifier="Alt"  keys={["D"]} note="Dark / light" />
-              <ShortcutRow label="Shortcuts Panel" modifier="Alt"  keys={[","]} note="Open this panel" />
-              <ShortcutRow label="Search"          modifier="Ctrl" keys={["K"]} note="Global search" />
+              <ShortcutRow label="New Sale" modifier="Alt" keys={["N"]} note="Open new bill" />
+              <ShortcutRow label="Toggle Theme" modifier="Alt" keys={["D"]} note="Dark / light" />
+              <ShortcutRow label="Shortcuts Panel" modifier="Alt" keys={[","]} note="Open this panel" />
+              <ShortcutRow label="Search" modifier="Ctrl" keys={["K"]} note="Global search" />
             </ShortcutSection>
 
             {/* Sale page */}
             <ShortcutSection title="Sale Page">
-              <ShortcutRow label="New Sale"    modifier="Alt"  keys={["A"]} />
+              <ShortcutRow label="New Sale" modifier="Alt" keys={["A"]} />
             </ShortcutSection>
 
             {/* Sale form */}
             <ShortcutSection title="Sale Form">
-              <ShortcutRow label="Add Item"    modifier="Alt"  keys={["A"]} />
+              <ShortcutRow label="Add Item" modifier="Alt" keys={["A"]} />
               <ShortcutRow label="Scan Barcode" modifier="Alt" keys={["V"]} />
-              <ShortcutRow label="Save Bill"   modifier="Ctrl" keys={["↵"]} />
+              <ShortcutRow label="Save Bill" modifier="Ctrl" keys={["↵"]} />
             </ShortcutSection>
 
             {/* Expenses */}
@@ -436,12 +436,12 @@ function AppSidebarContent({
 
             {/* Purchase */}
             <ShortcutSection title="Purchase Page">
-              <ShortcutRow label="New Purchase Bill" modifier="Alt"  keys={["A"]} />
+              <ShortcutRow label="New Purchase Bill" modifier="Alt" keys={["A"]} />
             </ShortcutSection>
 
             {/* Purchase form */}
             <ShortcutSection title="Purchase Form">
-              <ShortcutRow label="Add Item"  modifier="Alt"  keys={["W"]} />
+              <ShortcutRow label="Add Item" modifier="Alt" keys={["W"]} />
               <ShortcutRow label="Save Bill" modifier="Ctrl" keys={["S"]} />
             </ShortcutSection>
 
@@ -475,36 +475,36 @@ const bottomMoreNav = [
 
 // Navigation shortcuts — Alt + key
 export const navShortcuts: { path: string; label: string; key: string }[] = [
-  { path: "/",              label: "Home",          key: "H" },
-  { path: "/bills",         label: "Sale",          key: "S" },
-  { path: "/purchases",     label: "Purchase",      key: "B" },
-  { path: "/clients",       label: "Party",         key: "P" },
-  { path: "/bank-accounts", label: "Bank & Cash",   key: "K" },
-  { path: "/returns",       label: "Mobile Return", key: "R" },
-  { path: "/expenses",      label: "Expenses",      key: "E" },
-  { path: "/passbook",      label: "Passbook",      key: "L" },
-  { path: "/report",        label: "Report",        key: "T" },
-  { path: "/settings",      label: "Settings",      key: "G" },
-  { path: "/imei-timeline", label: "IMEI",          key: "I" },
+  { path: "/", label: "Home", key: "H" },
+  { path: "/bills", label: "Sale", key: "S" },
+  { path: "/purchases", label: "Purchase", key: "B" },
+  { path: "/clients", label: "Party", key: "P" },
+  { path: "/bank-accounts", label: "Bank & Cash", key: "K" },
+  { path: "/returns", label: "Mobile Return", key: "R" },
+  { path: "/expenses", label: "Expenses", key: "E" },
+  { path: "/passbook", label: "Passbook", key: "L" },
+  { path: "/report", label: "Report", key: "T" },
+  { path: "/settings", label: "Settings", key: "G" },
+  { path: "/imei-timeline", label: "IMEI", key: "I" },
 ];
 
 // Global action shortcuts (handled in Layout)
 export const globalShortcuts = [
-  { label: "New Sale",        modifier: "Alt", key: "N", note: "Open new bill form" },
-  { label: "Toggle Theme",    modifier: "Alt", key: "D", note: "Dark / light mode" },
+  { label: "New Sale", modifier: "Alt", key: "N", note: "Open new bill form" },
+  { label: "Toggle Theme", modifier: "Alt", key: "D", note: "Dark / light mode" },
   { label: "Shortcuts Panel", modifier: "Alt", key: ",", note: "Open this panel" },
 ];
 
 // Page-specific shortcuts (handled inside each page component)
 export const pageShortcuts = [
-  { page: "Sale Page",    label: "New Sale",        modifier: "Alt",  key: "A" },
-  { page: "Sale Form",    label: "Add Item",        modifier: "Alt",  key: "A" },
-  { page: "Sale Form",    label: "Scan Barcode",    modifier: "Alt",  key: "V" },
-  { page: "Sale Form",    label: "Save Bill",       modifier: "Ctrl", key: "↵" },
-  { page: "Expenses",     label: "Add Expense",    modifier: "Alt",  key: "A" },
-  { page: "Purchase Page",  label: "New Purchase Bill", modifier: "Alt",  key: "A" },
-  { page: "Purchase Form", label: "Add Item",          modifier: "Alt",  key: "W" },
-  { page: "Purchase Form", label: "Save Bill",          modifier: "Ctrl", key: "S" },
+  { page: "Sale Page", label: "New Sale", modifier: "Alt", key: "A" },
+  { page: "Sale Form", label: "Add Item", modifier: "Alt", key: "A" },
+  { page: "Sale Form", label: "Scan Barcode", modifier: "Alt", key: "V" },
+  { page: "Sale Form", label: "Save Bill", modifier: "Ctrl", key: "↵" },
+  { page: "Expenses", label: "Add Expense", modifier: "Alt", key: "A" },
+  { page: "Purchase Page", label: "New Purchase Bill", modifier: "Alt", key: "A" },
+  { page: "Purchase Form", label: "Add Item", modifier: "Alt", key: "W" },
+  { page: "Purchase Form", label: "Save Bill", modifier: "Ctrl", key: "S" },
 ];
 
 export function Layout({ children }: LayoutProps) {
@@ -583,7 +583,7 @@ export function Layout({ children }: LayoutProps) {
     if (pathname.startsWith("/expenses")) return "Expenses";
     if (pathname.startsWith("/imei-timeline")) return "IMEI";
     if (pathname.startsWith("/settings")) return "Settings";
-    return "Ibell";
+    return "MAA";
   };
   const isShellManagedRoute =
     location.pathname === "/" ||
