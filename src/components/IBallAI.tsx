@@ -628,7 +628,7 @@ ${ctxRef.current || "Business data is still loading..."}`;
                 </button>
               </div>
               <p className="text-[9px] text-center text-muted-foreground/40 mt-1.5 select-none">
-                Powered by i-ball
+                Powered by Maa Mobile
               </p>
             </div>
           </div>
