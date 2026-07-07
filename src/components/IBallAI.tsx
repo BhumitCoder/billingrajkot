@@ -249,7 +249,7 @@ function buildContext(
   });
   const iuOmitted = iu.length - Math.min(iu.length, IMEI_CAP);
 
-  return `=== iBall AI Business Data (${now.toLocaleTimeString("en-IN")}) ===
+  return `=== Maa AI Business Data (${now.toLocaleTimeString("en-IN")}) ===
 ${now.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })} | ${co?.name || "Business"}
 
 [TODAY ${todayKey}]
@@ -350,7 +350,7 @@ export function IBallAI() {
     setAiLoading(true);
 
     try {
-      const systemPrompt = `You are iBall AI — the dedicated intelligent business assistant for a mobile phone shop's inventory and billing management software.
+      const systemPrompt = `You are Maa AI — the dedicated intelligent business assistant for a mobile phone shop's inventory and billing management software.
 
 You have real-time access to the business data provided below. Use it to:
 - Give sharp, data-driven insights with exact numbers
@@ -406,7 +406,7 @@ ${ctxRef.current || "Business data is still loading..."}`;
         {
           id: `e-${Date.now()}`,
           role: "assistant",
-          content: `**Connection Error**\n${err.message || "Failed to reach iBall AI. Please check your connection and try again."}`,
+          content: `**Connection Error**\n${err.message || "Failed to reach Maa AI. Please check your connection and try again."}`,
           ts: new Date(),
           error: true,
         },
@@ -430,7 +430,7 @@ ${ctxRef.current || "Business data is still loading..."}`;
       {/* ── Floating trigger button ──────────────────────────── */}
       <button
         onClick={() => setOpen((v) => !v)}
-        title="iBall AI"
+        title="Maa AI"
         className="fixed bottom-[5.5rem] right-2 lg:bottom-5 lg:right-4 z-[55] h-10 w-10 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 active:scale-95 select-none"
         style={{ background: "linear-gradient(135deg, #7c3aed 0%, #2563eb 100%)" }}
       >
@@ -466,7 +466,7 @@ ${ctxRef.current || "Business data is still loading..."}`;
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-bold text-foreground">iBall AI</p>
+                  <p className="text-sm font-bold text-foreground">Maa AI</p>
                   {ctxLoading && <Loader2 className="size-3 animate-spin text-purple-500" />}
                 </div>
                 <p className="text-[10px] text-muted-foreground truncate">
@@ -504,7 +504,7 @@ ${ctxRef.current || "Business data is still loading..."}`;
                     >
                       <TrendingUp className="size-6 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <p className="text-sm font-bold">Hi! I'm iBall AI 👋</p>
+                    <p className="text-sm font-bold">Hi! I'm Maa AI 👋</p>
                     <p className="text-xs text-muted-foreground mt-1 px-4">
                       {ctxLoading
                         ? "Loading your business data, please wait…"
@@ -612,7 +612,7 @@ ${ctxRef.current || "Business data is still loading..."}`;
                     ctxLoading
                       ? "Loading data…"
                       : aiLoading
-                        ? "iBall AI is thinking…"
+                        ? "Maa AI is thinking…"
                         : "Ask about your business…"
                   }
                   disabled={aiLoading || ctxLoading}
