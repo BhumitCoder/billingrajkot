@@ -2607,6 +2607,60 @@ export const validatePurchaseBillImeis = async (
   return errors;
 };
 
+// Same as validatePurchaseBillImeis, but for editing an existing bill: excludes inventory
+// units already linked to excludeBillId, so an item's own pre-existing unit never blocks
+// saving the bill it already belongs to.
+export const validatePurchaseBillImeisForEdit = async (
+  items: Array<{ imeiNumber?: string; serialNumber?: string; description?: string; quantity?: number }>,
+  excludeBillId: string,
+): Promise<string[]> => {
+  const existingUnits = await getInventoryUnits();
+  const errors: string[] = [];
+  const seenIdentifiers = new Set<string>();
+
+  for (const item of items) {
+    const normalizedImei = normalizeImei(item.imeiNumber);
+    const normalizedSn = item.serialNumber?.trim() ? normalizeImei(item.serialNumber.trim()) : "";
+    const identifier = normalizedImei || normalizedSn;
+    if (!identifier) continue;
+
+    if (seenIdentifiers.has(identifier)) {
+      errors.push(`Duplicate IMEI/Serial in this bill: ${item.imeiNumber || item.serialNumber || ""}`);
+      continue;
+    }
+    seenIdentifiers.add(identifier);
+
+    const existingInStockUnit = existingUnits.find(
+      (u) =>
+        u.purchaseBillId !== excludeBillId &&
+        (u.status === "in_stock" || u.status === "reserved") &&
+        normalizeImei(u.imeiNormalized || u.imeiNumber) === identifier,
+    );
+    if (existingInStockUnit) {
+      const from = existingInStockUnit.vendorName || "unknown party";
+      errors.push(
+        `${item.imeiNumber || item.serialNumber || ""} is already in stock (purchased from "${from}"). Sell it first before re-purchasing.`,
+      );
+    }
+
+    if (normalizedImei && normalizedSn) {
+      const snConflict = existingUnits.find(
+        (u) =>
+          u.purchaseBillId !== excludeBillId &&
+          (u.status === "in_stock" || u.status === "reserved") &&
+          normalizeImei(u.serialNumber || "") === normalizedSn &&
+          normalizeImei(u.imeiNormalized || u.imeiNumber) !== normalizedImei,
+      );
+      if (snConflict) {
+        errors.push(
+          `Serial number ${item.serialNumber} is already assigned to another in-stock unit (IMEI: ${snConflict.imeiNumber || "none"}).`,
+        );
+      }
+    }
+  }
+  return errors;
+};
+
 export const addPurchaseItemsToInventory = async (
   bill: PurchaseBill,
   itemsWithSellingPrice: InventoryItemInput[],

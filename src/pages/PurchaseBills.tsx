@@ -16,6 +16,7 @@ import {
   deletePurchaseReturn,
   addPurchaseItemsToInventory,
   validatePurchaseBillImeis,
+  validatePurchaseBillImeisForEdit,
   isPurchaseBillDuplicate,
   updatePurchaseBillOverdueStatus,
   isPurchaseBillInventoryAdded,
@@ -233,6 +234,80 @@ function PurchaseBills() {
       if (isBlocking) break; // no need to keep looking
     }
     return bestMatch;
+  };
+
+  // Same as checkImeiConflict, but for the Edit dialog: excludes inventory units already
+  // linked to the bill being edited (so an item's own existing unit never flags itself as
+  // "already in stock"), and also flags duplicate IMEI/SN entered on another row of the
+  // same bill (which won't exist in inventoryUnits yet if it's a genuinely new item).
+  const checkEditImeiConflict = (imei: string, itemIndex: number): { message: string; isBlocking: boolean } | null => {
+    const norm = normalizeImei(imei);
+    if (!norm || !editedBill) return null;
+
+    const dupIndex = editedBill.items.findIndex((it, i) => {
+      if (i === itemIndex) return false;
+      const otherImei = normalizeImei((it as any).imeiNumber);
+      const otherSnRaw = (it as any).serialNumber?.trim();
+      const otherSn = otherSnRaw ? normalizeImei(otherSnRaw) : "";
+      return otherImei === norm || otherSn === norm;
+    });
+    if (dupIndex !== -1) {
+      return { message: `This IMEI/Serial is already added to item #${dupIndex + 1} in this bill.`, isBlocking: true };
+    }
+
+    // Scan ALL matching units (not just the first found) and prefer a blocking one —
+    // e.g. if this IMEI has both an old "sold" record and a separate "in_stock" record,
+    // it must still block, regardless of which one appears first in the array.
+    let best: { message: string; isBlocking: boolean } | null = null;
+    for (const u of inventoryUnits as any[]) {
+      if (u.purchaseBillId === editedBill.id) continue; // this item's own existing unit
+      let foundAs: string | null = null;
+      if (normalizeImei(u.imeiNormalized || u.imeiNumber) === norm) foundAs = "IMEI";
+      else if (u.serialNumber && normalizeImei(u.serialNumber) === norm) foundAs = "SN";
+      if (!foundAs) continue;
+      const isBlocking = u.status === "in_stock" || u.status === "reserved";
+      if (isBlocking) {
+        return {
+          message: `Already in stock as ${foundAs} — purchased from "${u.vendorName || "unknown"}". Sell it first.`,
+          isBlocking: true,
+        };
+      }
+      if (!best) {
+        best = {
+          message: `Previously in system as ${foundAs} (${u.status}) — purchased from "${u.vendorName || "unknown"}". Verify this is the same device.`,
+          isBlocking: false,
+        };
+      }
+    }
+    return best;
+  };
+
+  // Same as checkImeiConflict, but for the New Purchase dialog: also flags duplicate
+  // IMEI/SN entered on another row of the same new bill (won't exist in inventoryUnits
+  // yet since the bill hasn't been saved).
+  const checkManualImeiConflict = (imei: string, itemIndex: number): { message: string; isBlocking: boolean } | null => {
+    const norm = normalizeImei(imei);
+    if (!norm) return null;
+
+    const dupIndex = manualBill.items.findIndex((it, i) => {
+      if (i === itemIndex) return false;
+      const otherImei = normalizeImei((it as any).imeiNumber);
+      const otherSnRaw = (it as any).serialNumber?.trim();
+      const otherSn = otherSnRaw ? normalizeImei(otherSnRaw) : "";
+      return otherImei === norm || otherSn === norm;
+    });
+    if (dupIndex !== -1) {
+      return { message: `This IMEI/Serial is already added to item #${dupIndex + 1} in this bill.`, isBlocking: true };
+    }
+
+    const c = checkImeiConflict(imei);
+    if (!c) return null;
+    return {
+      message: c.isBlocking
+        ? `Already in stock as ${c.foundAs} — purchased from "${c.unit.vendorName || "unknown"}". Sell it first.`
+        : `Previously in system as ${c.foundAs} (${c.unit.status}) — purchased from "${c.unit.vendorName || "unknown"}". Verify this is the same device.`,
+      isBlocking: c.isBlocking,
+    };
   };
 
   const buildVariantKey = (item: {
@@ -2640,6 +2715,18 @@ function PurchaseBills() {
         updatedAt: new Date().toISOString(),
       };
 
+      // Block save if any IMEI/serial is duplicated in this bill or already in stock elsewhere
+      const imeiErrors = await validatePurchaseBillImeisForEdit(updatedBill.items, updatedBill.id);
+      if (imeiErrors.length > 0) {
+        toast({
+          title: "IMEI / Serial Conflict",
+          description: imeiErrors.join("\n"),
+          variant: "destructive",
+        });
+        setSavingEditedBill(false);
+        return;
+      }
+
       await updatePurchaseBill(updatedBill);
       await syncBillPricesToInventory(updatedBill);
       await addInventoryUnitsForNewEditedItems(updatedBill);
@@ -4133,7 +4220,7 @@ function PurchaseBills() {
                               <div className="space-y-1">
                                 <Label>IMEI 1</Label>
                                 {(() => {
-                                  const c = checkImeiConflict((item as any).imeiNumber || "");
+                                  const c = checkManualImeiConflict((item as any).imeiNumber || "", index);
                                   return (
                                     <>
                                       <Input
@@ -4144,9 +4231,7 @@ function PurchaseBills() {
                                       />
                                       {c && (
                                         <p className={`text-xs mt-0.5 ${c.isBlocking ? "text-red-600" : "text-orange-600"}`}>
-                                          ⚠ {c.isBlocking
-                                            ? `Already in stock as ${c.foundAs} — purchased from "${c.unit.vendorName || "unknown"}". Sell it first.`
-                                            : `Previously in system as ${c.foundAs} (${c.unit.status}) — purchased from "${c.unit.vendorName || "unknown"}". Verify this is the same device.`}
+                                          ⚠ {c.message}
                                         </p>
                                       )}
                                     </>
@@ -4606,12 +4691,12 @@ function PurchaseBills() {
                       type="button"
                       onClick={handleSaveManualBill}
                       loading={isSaving}
-                      disabled={isSaving || manualBill.items.some((item: any) =>
-                        checkImeiConflict(item.imeiNumber || "")?.isBlocking
+                      disabled={isSaving || manualBill.items.some((item: any, idx: number) =>
+                        checkManualImeiConflict(item.imeiNumber || "", idx)?.isBlocking
                       )}
-                      title={manualBill.items.some((item: any) =>
-                        checkImeiConflict(item.imeiNumber || "")?.isBlocking
-                      ) ? "Cannot save — one or more IMEIs are already in stock" : undefined}
+                      title={manualBill.items.some((item: any, idx: number) =>
+                        checkManualImeiConflict(item.imeiNumber || "", idx)?.isBlocking
+                      ) ? "Cannot save — one or more IMEIs are duplicated or already in stock" : undefined}
                     >
                       Create Purchase Bill
                     </Button>
@@ -4726,6 +4811,12 @@ function PurchaseBills() {
                           size="default"
                           onClick={saveEditedBill}
                           loading={savingEditedBill}
+                          disabled={savingEditedBill || Boolean(editedBill?.items.some((item, idx) =>
+                            checkEditImeiConflict((item as any).imeiNumber || "", idx)?.isBlocking
+                          ))}
+                          title={editedBill?.items.some((item, idx) =>
+                            checkEditImeiConflict((item as any).imeiNumber || "", idx)?.isBlocking
+                          ) ? "Cannot save — one or more IMEIs are duplicated or already in stock" : undefined}
                         >
                           <Save className="h-4 w-4 mr-2" /> Save
                         </Button>
@@ -5324,18 +5415,30 @@ function PurchaseBills() {
                                             className={`h-8 text-sm font-mono ${snAutoGenerate ? "bg-muted cursor-default" : ""}`}
                                             placeholder={snAutoGenerate ? "SN (auto)" : "Enter SN"}
                                           />
-                                          <Input
-                                            value={(item as any).imeiNumber || ""}
-                                            onChange={(e) =>
-                                              updateEditedItem(
-                                                index,
-                                                "imeiNumber" as any,
-                                                e.target.value,
-                                              )
-                                            }
-                                            className="h-8 text-sm"
-                                            placeholder="IMEI 1"
-                                          />
+                                          {(() => {
+                                            const c = checkEditImeiConflict((item as any).imeiNumber || "", index);
+                                            return (
+                                              <div className="space-y-0.5">
+                                                <Input
+                                                  value={(item as any).imeiNumber || ""}
+                                                  onChange={(e) =>
+                                                    updateEditedItem(
+                                                      index,
+                                                      "imeiNumber" as any,
+                                                      e.target.value,
+                                                    )
+                                                  }
+                                                  className={`h-8 text-sm ${c ? (c.isBlocking ? "border-red-500 focus-visible:ring-red-500" : "border-orange-400 focus-visible:ring-orange-400") : ""}`}
+                                                  placeholder="IMEI 1"
+                                                />
+                                                {c && (
+                                                  <p className={`text-xs ${c.isBlocking ? "text-red-600" : "text-orange-600"}`}>
+                                                    ⚠ {c.message}
+                                                  </p>
+                                                )}
+                                              </div>
+                                            );
+                                          })()}
                                           <Input
                                             value={(item as any).storage || ""}
                                             list="purchase-storage-options"

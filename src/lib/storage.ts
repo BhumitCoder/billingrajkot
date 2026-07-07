@@ -43,6 +43,7 @@ export {
   deletePurchaseReturn,
   addPurchaseItemsToInventory,
   validatePurchaseBillImeis,
+  validatePurchaseBillImeisForEdit,
   isPurchaseBillDuplicate,
   isPurchaseBillInventoryAdded,
   updatePurchaseBillOverdueStatus,
